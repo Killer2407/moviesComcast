@@ -1,18 +1,18 @@
-import { Lightning } from "@lightningjs/sdk";
-import { Row, Column } from "@lightningjs/ui-components";
-import Input from "./Input";
-import Tile from "./Tile";
-import retrieveData from "./api/api";
+import { Lightning } from '@lightningjs/sdk'
+import { Row, Column } from '@lightningjs/ui-components'
+import Input from './Input'
+import Tile from './Tile'
+import retrieveData from './api/api'
 
 const defaultImage =
-  "https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Blue_question_mark_icon.svg/480px-Blue_question_mark_icon.svg.png";
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Blue_question_mark_icon.svg/480px-Blue_question_mark_icon.svg.png'
 export default class SearchPage extends Lightning.Component {
   static _template() {
     return {
       Input: {
         type: Input,
         w: 1920,
-        h: 50
+        h: 50,
       },
       ResultsColumn: {
         x: 175,
@@ -21,25 +21,25 @@ export default class SearchPage extends Lightning.Component {
         h: 980,
         type: Column,
         itemSpacing: 100,
-        plinko: true
-      }
-    };
+        plinko: true,
+      },
+    }
   }
 
   _init() {
-    this.query = "";
+    this.query = ''
   }
 
   get _Input() {
-    return this.tag("Input");
+    return this.tag('Input')
   }
 
   get _ResultsRow() {
-    return this.tag("ResultsRow");
+    return this.tag('ResultsRow')
   }
 
   get _ResultsColumn() {
-    return this.tag("ResultsColumn");
+    return this.tag('ResultsColumn')
   }
 
   /**
@@ -58,8 +58,18 @@ export default class SearchPage extends Lightning.Component {
      * The end of this method has been provided below but you will need to ensure this.query is
      * populated correctly as you type on the keyboard
      */
-    this._Input.inputText = this.query;
-    this.retrieveData(this.query);
+    if (event) {
+      if (event.key === 'Backspace') {
+        if (this.query.length > 0) {
+          this.query = this.query.substring(0, this.query.length - 1)
+        }
+      } else {
+        this.query += event.key
+      }
+      // event = event.trim().toLowerCase()
+    }
+    this._Input.inputText = this.query
+    this.retrieveData(this.query)
   }
 
   /**
@@ -68,8 +78,9 @@ export default class SearchPage extends Lightning.Component {
    * @param {*} query
    */
   async retrieveData(query) {
-    const data = await retrieveData(query);
-    this.populateResults(data);
+    const data = await retrieveData(query)
+    // console.log('ddd', data)
+    this.populateResults(data)
   }
 
   populateResults(data) {
@@ -96,13 +107,36 @@ export default class SearchPage extends Lightning.Component {
      * Use the methods below to both clear and populate the results.
      *
      */
+    const imageUrl = []
+    data.map(a => {
+      if (a.show.image != null) {
+        // console.log('inside map' + a.show.image.medium)
+        let d = a.show.image.medium
+        imageUrl.push(d)
+      }
+    })
+    console.log('image', imageUrl.length)
+    this.populateResultRows(imageUrl)
+    // console.log ('d',data);
+    // return(
+    //   <div>
+    //   {data.map((a)=>{
+    //     // console.log("inside map func")
+    //     // console.log(a.show.image)
+    //     // <Tile imageUrl={a.show.image.medium} title = {a.show.name} />2
+    //     <img src="https://images.pexels.com/photos/20787/pexels-photo.jpg?auto=compress&cs=tinysrgb&h=350"
+    //     alt="new"
+    //     />
+    // } )}
+    // </div>
+    // )
   }
 
   /**
    * Clears the results
    */
   clearResults() {
-    this._ResultsColumn.items = [];
+    this._ResultsColumn.items = []
   }
 
   /**
@@ -112,6 +146,7 @@ export default class SearchPage extends Lightning.Component {
    * @param {Object[]} rows - array of rows to populate, each row should have a max of 5 items
    */
   populateResultRows(rows) {
+    console.log('----------------------', rows)
     for (const row of rows) {
       if (row.length > 0) {
         this._ResultsColumn.appendItems([
@@ -121,14 +156,14 @@ export default class SearchPage extends Lightning.Component {
             h: 400,
             itemSpacing: 50,
             items: row,
-            skipPlinko: false
-          }
-        ]);
+            skipPlinko: false,
+          },
+        ])
       }
     }
   }
 
   _getFocused() {
-    return this._ResultsColumn;
+    return this._ResultsColumn
   }
 }
